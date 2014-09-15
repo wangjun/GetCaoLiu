@@ -11,6 +11,7 @@ import sys
 import re
 import requests
 import argparse
+import eventlet
 
 confirm_yes = ['y','ye','yes']
 headers = {
@@ -35,7 +36,8 @@ class CaoLiu(object):
         输入url后，获取的视频src链接
         """
 	try:
-		r = ss.get(self.url)
+	        with eventlet.Timeout(10):
+			r = ss.get(self.url)
 		if r.ok:
 		    link_search = re.search(r'src=(http.+?\&mp4=1)', r.content)
 		    if link_search:
@@ -46,6 +48,9 @@ class CaoLiu(object):
 		    # if name_search:
 		    #     name = name_search.group(1)
 		    #     print name
+		    else:
+			print "This page has no mp4 url"
+			sys.exit()
 		else:
 		    print "Please check your network.Beacause these website need proxy.But the domain 5.yao.cl do not need"
 		    sys.exit(1)
@@ -64,14 +69,15 @@ class CaoLiu(object):
 				self.download(link)
 			else:
 				sys.exit(0)
+                    else:
+			print "This page has no mp4 url"
+			sys.exit()
 		else:
 		    print "Get video real link failed"
 		    sys.exit(2)
 	except KeyboardInterrupt:
 		sys.exit()
 
-            
-            
     def download(self,link):
         if args.axel:
             cmd = 'axel -a %s' % (link)
@@ -99,5 +105,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     main(args.url)
-    
-    
