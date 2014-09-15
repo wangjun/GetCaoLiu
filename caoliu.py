@@ -5,13 +5,16 @@
 
 """
 下载草榴社区视频
+return status:
+	0 ==> success
+	1 ==> requests get timeout
+	2 ==>
 """
 import os
 import sys
 import re
 import requests
 import argparse
-import eventlet
 
 confirm_yes = ['y','ye','yes']
 headers = {
@@ -26,6 +29,29 @@ headers = {
 
 ss = requests.session()
 ss.headers.update(headers)
+class bcolors:
+    HEADER='\033[95m'
+    OKBLUE='\033[94m'
+    OKGREEN='\033[92m'
+    WARNING='\033[93m'
+    FAIL='\033[91m'
+    ENDC='\033[0m'
+
+class Print():
+    def print_header(self,message):
+        print bcolors.HEADER + message + bcolors.ENDC
+
+    def print_okblue(self,message):
+        print bcolors.OKBLUE + message + bcolors.ENDC
+
+    def print_okgreen(self,message):
+        print bcolors.OKGREEN + message + bcolors.ENDC
+
+    def print_warning(self,message):
+        print bcolors.WARNING + message + bcolors.ENDC
+
+    def print_fail(self,message):
+        print bcolors.FAIL + message + bcolors.ENDC
 
 class CaoLiu(object):
     def __init__(self, url=None):
@@ -36,9 +62,15 @@ class CaoLiu(object):
         输入url后，获取的视频src链接
         """
 	try:
-	        with eventlet.Timeout(10):
-			r = ss.get(self.url)
+		try:
+			print_message.print_header("getting page content")
+			r = ss.get(self.url, timeout=10)
+			print_message.print_okgreen("page content got")
+                except requests.exceptions.Timeout:
+			print_message.print_fail("Timeout to get page content")
+			sys.exit(1)
 		if r.ok:
+	            print_message.print_header("searching fist page's mp4 url")
 		    link_search = re.search(r'src=(http.+?\&mp4=1)', r.content)
 		    if link_search:
 			link = link_search.group(1)
@@ -49,10 +81,10 @@ class CaoLiu(object):
 		    #     name = name_search.group(1)
 		    #     print name
 		    else:
-			print "This page has no mp4 url"
+			print_message.print_fail("This first page has no mp4 url")
 			sys.exit()
 		else:
-		    print "Please check your network.Beacause these website need proxy.But the domain 5.yao.cl do not need"
+		    print_message.print_warning("Please check your network.Beacause these website need proxy.But the domain 5.yao.cl do not need")
 		    sys.exit(1)
 		
 		"""
@@ -60,20 +92,21 @@ class CaoLiu(object):
 		"""
 		r = ss.get(link)
 		if r.ok:
+		    print "getting real mp4 url"
 		    link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
 		    if link_search:
 			link = link_search.group(1)
-			print "Video url is :",link
+			print_message.print_okgreen("Video url is ==> : %s\n" % link)
 			confirm  = raw_input("Want to download video(y/n): ").lower()
 			if confirm in confirm_yes:
 				self.download(link)
 			else:
 				sys.exit(0)
                     else:
-			print "This page has no mp4 url"
+			print_message.print_fail("This second page has no mp4 url")
 			sys.exit()
 		else:
-		    print "Get video real link failed"
+		    print_message.print_fail("Get video real link failed")
 		    sys.exit(2)
 	except KeyboardInterrupt:
 		sys.exit()
@@ -88,6 +121,8 @@ class CaoLiu(object):
     def do(self):
         self.get_link()
         
+print_message = Print()
+
 def main(url):
     caoliu = CaoLiu(url)
     caoliu.do()
