@@ -92,7 +92,6 @@ class CaoLiu(object):
 		"""
 		r = ss.get(link)
 		if r.ok:
-		    print "getting real mp4 url"
 		    link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
 		    if link_search:
 			link = link_search.group(1)
