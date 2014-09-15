@@ -34,38 +34,42 @@ class CaoLiu(object):
         """
         输入url后，获取的视频src链接
         """
-        r = ss.get(self.url)
-        if r.ok:
-            link_search = re.search(r'src=(http.+?\&mp4=1)', r.content)
-            if link_search:
-                link = link_search.group(1)
-                # print link
-                
-            # name_search = re.search(r'<title>(.*)\[\d+.*</title>', r.content)
-            # if name_search:
-            #     name = name_search.group(1)
-            #     print name
-        else:
-            print "Please check your network.Beacause these website need proxy.But the domain 5.yao.cl do not need"
-            sys.exit(1)
-        
-        """
-        获取真正的video链接
-        """
-        r = ss.get(link)
-        if r.ok:
-            link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
-            if link_search:
-                link = link_search.group(1)
-		print "Video url is :",link
-		confirm  = raw_input("Want to download video(y/n): ").lower()
-		if confirm in confirm_yes:
-			self.download(link)
+	try:
+		r = ss.get(self.url)
+		if r.ok:
+		    link_search = re.search(r'src=(http.+?\&mp4=1)', r.content)
+		    if link_search:
+			link = link_search.group(1)
+			# print link
+			
+		    # name_search = re.search(r'<title>(.*)\[\d+.*</title>', r.content)
+		    # if name_search:
+		    #     name = name_search.group(1)
+		    #     print name
 		else:
-			sys.exit(0)
-        else:
-            print "Get video real link failed"
-            sys.exit(2)
+		    print "Please check your network.Beacause these website need proxy.But the domain 5.yao.cl do not need"
+		    sys.exit(1)
+		
+		"""
+		获取真正的video链接
+		"""
+		r = ss.get(link)
+		if r.ok:
+		    link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
+		    if link_search:
+			link = link_search.group(1)
+			print "Video url is :",link
+			confirm  = raw_input("Want to download video(y/n): ").lower()
+			if confirm in confirm_yes:
+				self.download(link)
+			else:
+				sys.exit(0)
+		else:
+		    print "Get video real link failed"
+		    sys.exit(2)
+	except KeyboardInterrupt:
+		sys.exit()
+
             
             
     def download(self,link):
