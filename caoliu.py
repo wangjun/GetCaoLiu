@@ -12,6 +12,7 @@ import re
 import requests
 import argparse
 
+confirm_yes = ['y','ye','yes']
 headers = {
     "Accept":"text/html,application/xhtml+xml,application/xml; " \
         "q=0.9,image/webp,*/*;q=0.8",
@@ -56,8 +57,12 @@ class CaoLiu(object):
             link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
             if link_search:
                 link = link_search.group(1)
-                print link
-                self.download(link)
+		print "Video url is :",link
+		confirm  = raw_input("Want to download video(y/n): ").lower()
+		if confirm in confirm_yes:
+			self.download(link)
+		else:
+			sys.exit(0)
         else:
             print "Get video real link failed"
             sys.exit(2)
