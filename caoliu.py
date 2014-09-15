@@ -95,7 +95,7 @@ class CaoLiu(object):
 		    link_search = re.search(r'file: "(http.+?\.mp4)', r.content)
 		    if link_search:
 			link = link_search.group(1)
-			print_message.print_okgreen("Video url is ==> : %s\n" % link)
+			print_message.print_okgreen("Video url is ==>  %s\n" % link)
 			confirm  = raw_input("Want to download video(y/n): ").lower()
 			if confirm in confirm_yes:
 				self.download(link)
@@ -115,7 +115,6 @@ class CaoLiu(object):
             cmd = 'axel -a %s' % (link)
         else:
             cmd = 'wget %s' % (link)
-        # status = os.system(cmd)
         os.system(cmd)
     def do(self):
         self.get_link()
